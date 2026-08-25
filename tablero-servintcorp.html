@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero de Seguimiento de Acuerdos — SERVINTCORP S.A.S.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F8;
+    --surface:#FFFFFF;
+    --ink:#111827;
+    --ink-dim:#667085;
+    --line:#E4E8EE;
+    --brand:#1E3A5F;
+    --brand-2:#2E5581;
+    --brand-bg:#E9EFF6;
+    --amber:#B4650A;
+    --amber-bg:#FDF1E1;
+    --amber-line:#F0CE9A;
+    --teal:#0E7C5F;
+    --teal-bg:#E4F5EF;
+    --teal-line:#A9DCC7;
+    --blue:#1D4ED8;
+    --blue-bg:#E9EFFD;
+    --blue-line:#B7C8F7;
+    --slate:#5B6577;
+    --slate-bg:#EEF0F3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    padding:0 0 60px;
+  }
+
+  /* Top bar */
+  .topbar{
+    background:var(--brand);
+    background-image:linear-gradient(120deg, var(--brand) 0%, var(--brand-2) 100%);
+    color:#fff;
+    padding:28px 32px 26px;
+  }
+  .topbar-inner{
+    max-width:1280px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .brand-mark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#C8D6E8;
+    margin-bottom:12px;
+  }
+  .brand-mark::before{
+    content:"";
+    width:9px;height:9px;
+    background:#5FE0B4;
+    border-radius:2px;
+  }
+  .topbar h1{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:clamp(24px,3.4vw,32px);
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .topbar p{
+    margin:0;
+    font-size:14px;
+    color:#D6E0EC;
+    max-width:560px;
+    line-height:1.5;
+  }
+  .last-update{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:#C8D6E8;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:7px 12px;
+    border-radius:100px;
+    white-space:nowrap;
+  }
+
+  .wrap{max-width:1280px; margin:0 auto; padding:0 32px;}
+
+  /* KPI strip */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:14px;
+    margin-top:-26px;
+    position:relative;
+    z-index:2;
+  }
+  .kpi{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 16px 14px;
+    box-shadow:0 4px 14px rgba(17,24,39,0.05);
+  }
+  .kpi-num{font-family:'Manrope', sans-serif; font-weight:800; font-size:26px; line-height:1;}
+  .kpi-label{font-size:11.5px; color:var(--ink-dim); margin-top:6px; font-weight:500;}
+  .kpi-bar{height:4px; border-radius:100px; background:var(--line); margin-top:10px; overflow:hidden;}
+  .kpi-bar-fill{height:100%; border-radius:100px;}
+
+  /* Toolbar */
+  .toolbar{
+    margin-top:30px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .search-box{
+    flex:1;
+    min-width:220px;
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 12px 9px 34px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    background:var(--bg);
+  }
+  .search-box input:focus{outline:2px solid var(--blue); outline-offset:1px;}
+  .search-box::before{
+    content:"⌕";
+    position:absolute;
+    left:11px; top:50%; transform:translateY(-50%);
+    color:var(--ink-dim);
+    font-size:15px;
+  }
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.02em;
+    padding:7px 12px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    color:var(--ink-dim);
+    cursor:pointer;
+    user-select:none;
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--brand-2);}
+  .chip.active{background:var(--brand); color:#fff; border-color:var(--brand);}
+  select.filter-select{
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    color:var(--ink);
+  }
+
+  /* Board */
+  .board-title{
+    display:flex; align-items:center; gap:10px;
+    margin:30px 0 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim);
+  }
+  .board-title .line{flex:1; height:1px; background:var(--line);}
+
+  .columns{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:16px;
+    align-items:start;
+  }
+  .col{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 12px 16px;
+  }
+  .col-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:12px; margin-bottom:12px;
+    border-bottom:2px solid var(--line);
+  }
+  .col-head h2{font-family:'Manrope', sans-serif; font-size:14px; font-weight:700; margin:0;}
+  .col-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    padding:2px 9px;
+    border-radius:100px;
+  }
+  .col[data-status="Pendiente"] .col-head{border-color:var(--amber-line);}
+  .col[data-status="Pendiente"] .col-count{background:var(--amber-bg); color:var(--amber);}
+  .col[data-status="En proceso"] .col-head{border-color:var(--blue-line);}
+  .col[data-status="En proceso"] .col-count{background:var(--blue-bg); color:var(--blue);}
+  .col[data-status="Aprobado"] .col-head{border-color:var(--blue-line);}
+  .col[data-status="Aprobado"] .col-count{background:var(--blue-bg); color:var(--blue);}
+  .col[data-status="Cumplido"] .col-head{border-color:var(--teal-line);}
+  .col[data-status="Cumplido"] .col-count{background:var(--teal-bg); color:var(--teal);}
+
+  .card{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 13px 12px;
+    margin-bottom:10px;
+  }
+  .card:last-child{margin-bottom:0;}
+  .card-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .num{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--ink-dim);}
+  .badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px; letter-spacing:0.03em; text-transform:uppercase;
+    padding:2.5px 8px; border-radius:100px; font-weight:600;
+  }
+  .prio-alta{background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-line);}
+  .prio-media{background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-line);}
+  .prio-baja{background:var(--slate-bg); color:var(--slate); border:1px solid var(--line);}
+
+  .card h3{font-family:'Manrope', sans-serif; font-size:13.5px; font-weight:700; margin:0 0 6px; line-height:1.3;}
+  .situacion{font-size:12px; color:var(--ink-dim); line-height:1.5; margin:0 0 9px;}
+  .situacion b{color:var(--ink);}
+
+  .action-box{
+    background:var(--surface);
+    border:1px dashed var(--line);
+    border-radius:7px;
+    padding:8px 10px;
+    margin-bottom:10px;
+  }
+  .action-label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--brand-2); margin-bottom:3px; font-weight:600;
+  }
+  .action-box p{margin:0; font-size:12px; line-height:1.45; color:var(--ink);}
+
+  .meta-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .meta-label{display:block; font-size:9.5px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;}
+  .meta-value{font-size:11.5px; color:var(--ink); font-weight:500; line-height:1.3;}
+  .evidence{
+    font-size:11px; color:var(--ink-dim);
+    border-top:1px solid var(--line);
+    padding-top:8px;
+  }
+  .evidence b{color:var(--ink); font-weight:600;}
+
+  .empty-msg{
+    font-size:12px; color:var(--ink-dim);
+    text-align:center; padding:24px 10px;
+    border:1px dashed var(--line); border-radius:8px;
+  }
+
+  footer.note{
+    margin-top:26px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--ink-dim);
+    text-align:center;
+    padding:14px;
+    border:1px dashed var(--line); border-radius:8px;
+    background:var(--surface);
+  }
+
+  @media (max-width:1080px){
+    .columns{grid-template-columns:repeat(2,1fr);}
+    .kpis{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:640px){
+    .columns{grid-template-columns:1fr;}
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .wrap{padding:0 16px;}
+    .topbar{padding:24px 16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand-mark">SERVINTCORP S.A.S.</div>
+      <h1>Tablero de Seguimiento de Acuerdos</h1>
+      <p>Acompañamiento organizacional del Consejo Directivo — programa Neuro-Ágil Performance Pulse.</p>
+    </div>
+    <div class="last-update">11 acuerdos registrados</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Buscar por acuerdo, situación o responsable…">
+    </div>
+    <div class="chips" id="priorityChips">
+      <span class="chip active" data-prio="Todas">Todas</span>
+      <span class="chip" data-prio="Alta">Alta</span>
+      <span class="chip" data-prio="Media">Media</span>
+      <span class="chip" data-prio="Baja">Baja</span>
+    </div>
+    <select class="filter-select" id="responsableSelect">
+      <option value="Todos">Todos los responsables</option>
+    </select>
+  </div>
+
+  <div class="board-title">Estado por acuerdo <span class="line"></span></div>
+
+  <div class="columns" id="board"></div>
+
+  <footer class="note">Tablero generado a partir de "Tablero_Digital_Acuerdos_SERVINTCORP.xlsx" — Consejo Directivo</footer>
+</div>
+
+<script>
+const acuerdos = [
+  {n:1, titulo:"Verificar el quórum", situacion:"Se verificó la presencia de la mayoría de los miembros", accion:"Mantener registro de asistencia y quórum en cada reunión", responsable:"Presidente / Secretario Técnico", prioridad:"Baja", estado:"Cumplido", fecha:"Fecha de reunión", evidencia:"Acta y lista de asistencia"},
+  {n:2, titulo:"Mejorar la productividad", situacion:"Baja productividad y retrasos en procesos", accion:"Reestructurar los procesos internos", responsable:"Gerente General", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Plan de acción"},
+  {n:3, titulo:"Eliminar duplicidad de funciones", situacion:"Se evidenció duplicidad de funciones", accion:"Revisar y definir claramente las funciones de cada cargo", responsable:"Director Administrativo", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Manual de funciones actualizado"},
+  {n:4, titulo:"Reducir sobrecostos", situacion:"Sobrecostos generados por reprocesos", accion:"Identificar y eliminar las causas de los reprocesos", responsable:"Director Financiero", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Informe financiero"},
+  {n:5, titulo:"Fortalecer la capacitación", situacion:"Se requiere capacitación del personal", accion:"Diseñar e implementar un plan de capacitación", responsable:"Director de Talento Humano", prioridad:"Media", estado:"Pendiente", fecha:"Por definir", evidencia:"Plan de capacitación"},
+  {n:6, titulo:"Organizar la documentación", situacion:"Existe desorganización documental", accion:"Organizar y estandarizar la gestión documental", responsable:"Director Administrativo", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Archivo organizado"},
+  {n:7, titulo:"Implementar indicadores", situacion:"Se requiere medir el desempeño de la empresa", accion:"Diseñar e implementar indicadores de gestión", responsable:"Gerente General", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Tablero de indicadores"},
+  {n:8, titulo:"Optimizar recursos", situacion:"Se identificaron oportunidades de mejora en el uso de recursos", accion:"Implementar acciones para optimizar los recursos disponibles", responsable:"Director Financiero", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Informe de resultados"},
+  {n:9, titulo:"Registrar excusa de Pedro Posada Beltrán", situacion:"Ausencia por motivos laborales", accion:"Registrar y conservar la excusa aceptada por el Consejo Directivo", responsable:"Secretario Técnico", prioridad:"Baja", estado:"Cumplido", fecha:"Fecha de reunión", evidencia:"Carta de justificación"},
+  {n:10, titulo:"Ingreso de asesora externa", situacion:"Solicitud de ingreso de Juliana Saavedra Perilla", accion:"Formalizar su vinculación como asesora externa", responsable:"Consejo Directivo", prioridad:"Media", estado:"Aprobado", fecha:"Por definir", evidencia:"Acta de aprobación"},
+  {n:11, titulo:"Apoyar propuesta de innovación", situacion:"Aporte a la propuesta Neuro-Ágil Performance Pulse", accion:"Integrar los aportes de la asesora al proyecto de innovación", responsable:"Gerente General / Asesora Externa", prioridad:"Alta", estado:"Pendiente", fecha:"Por definir", evidencia:"Propuesta de innovación"}
+];
+
+const estadoOrder = ["Pendiente","En proceso","Aprobado","Cumplido"];
+const estadoColorVar = {Pendiente:"amber","En proceso":"blue",Aprobado:"blue",Cumplido:"teal"};
+const prioClass = {Alta:"prio-alta", Media:"prio-media", Baja:"prio-baja"};
+
+function renderKPIs(){
+  const total = acuerdos.length;
+  const cumplidos = acuerdos.filter(a=>a.estado==="Cumplido").length;
+  const enProceso = acuerdos.filter(a=>a.estado==="En proceso").length;
+  const pendientes = acuerdos.filter(a=>a.estado==="Pendiente").length;
+  const aprobados = acuerdos.filter(a=>a.estado==="Aprobado").length;
+
+  const kpis = [
+    {label:"Total de acuerdos", value: total, color:"var(--brand)"},
+    {label:"Cumplidos", value: cumplidos, color:"var(--teal)"},
+    {label:"En proceso", value: enProceso, color:"var(--blue)"},
+    {label:"Pendientes", value: pendientes, color:"var(--amber)"},
+    {label:"Aprobados", value: aprobados, color:"var(--blue)"}
+  ];
+
+  document.getElementById("kpis").innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-num" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${total? Math.round(k.value/total*100):0}%; background:${k.color}"></div></div>
+    </div>
+  `).join("");
+}
+
+function populateResponsables(){
+  const set = [...new Set(acuerdos.map(a=>a.responsable))].sort();
+  const sel = document.getElementById("responsableSelect");
+  set.forEach(r=>{
+    const opt = document.createElement("option");
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  });
+}
+
+function cardHTML(a){
+  return `
+    <div class="card" data-prioridad="${a.prioridad}" data-responsable="${a.responsable}"
+         data-search="${(a.titulo+' '+a.situacion+' '+a.responsable).toLowerCase()}">
+      <div class="card-top">
+        <span class="num">N.º ${String(a.n).padStart(2,'0')}</span>
+        <span class="badge ${prioClass[a.prioridad]}">${a.prioridad}</span>
+      </div>
+      <h3>${a.titulo}</h3>
+      <p class="situacion"><b>Situación:</b> ${a.situacion}</p>
+      <div class="action-box">
+        <span class="action-label">Acción a realizar</span>
+        <p>${a.accion}</p>
+      </div>
+      <div class="meta-grid">
+        <div><span class="meta-label">Responsable</span><span class="meta-value">${a.responsable}</span></div>
+        <div><span class="meta-label">Fecha límite</span><span class="meta-value">${a.fecha}</span></div>
+      </div>
+      <div class="evidence"><b>Evidencia:</b> ${a.evidencia}</div>
+    </div>
+  `;
+}
+
+function renderBoard(){
+  const board = document.getElementById("board");
+  board.innerHTML = estadoOrder.map(estado=>{
+    const items = acuerdos.filter(a=>a.estado===estado);
+    return `
+      <section class="col" data-status="${estado}">
+        <div class="col-head">
+          <h2>${estado}</h2>
+          <span class="col-count" data-count-for="${estado}">${items.length}</span>
+        </div>
+        <div class="col-body" data-body-for="${estado}">
+          ${items.length ? items.map(cardHTML).join("") : '<div class="empty-msg">Sin acuerdos en este estado</div>'}
+        </div>
+      </section>
+    `;
+  }).join("");
+}
+
+function applyFilters(){
+  const query = document.getElementById("searchInput").value.trim().toLowerCase();
+  const activePrio = document.querySelector(".chip.active").dataset.prio;
+  const responsable = document.getElementById("responsableSelect").value;
+
+  estadoOrder.forEach(estado=>{
+    const body = document.querySelector(`[data-body-for="${estado}"]`);
+    const cards = body.querySelectorAll(".card");
+    let visibleCount = 0;
+
+    cards.forEach(card=>{
+      const matchesQuery = !query || card.dataset.search.includes(query);
+      const matchesPrio = activePrio === "Todas" || card.dataset.prioridad === activePrio;
+      const matchesResp = responsable === "Todos" || card.dataset.responsable === responsable;
+      const visible = matchesQuery && matchesPrio && matchesResp;
+      card.style.display = visible ? "" : "none";
+      if(visible) visibleCount++;
+    });
+
+    document.querySelector(`[data-count-for="${estado}"]`).textContent = visibleCount;
+
+    let emptyMsg = body.querySelector(".empty-msg");
+    const hasCards = cards.length > 0;
+    if(hasCards && visibleCount === 0){
+      if(!emptyMsg){
+        emptyMsg = document.createElement("div");
+        emptyMsg.className = "empty-msg";
+        emptyMsg.textContent = "Sin resultados para este filtro";
+        body.appendChild(emptyMsg);
+      }
+      emptyMsg.style.display = "";
+    } else if(emptyMsg && hasCards){
+      emptyMsg.style.display = "none";
+    }
+  });
+}
+
+document.getElementById("priorityChips").addEventListener("click", e=>{
+  if(!e.target.classList.contains("chip")) return;
+  document.querySelectorAll("#priorityChips .chip").forEach(c=>c.classList.remove("active"));
+  e.target.classList.add("active");
+  applyFilters();
+});
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("responsableSelect").addEventListener("change", applyFilters);
+
+renderKPIs();
+populateResponsables();
+renderBoard();
+</script>
+</body>
+</html>
